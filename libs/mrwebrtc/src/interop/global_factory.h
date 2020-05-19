@@ -4,6 +4,7 @@
 #pragma once
 
 #include "export.h"
+#include <modules/audio_device/include/audio_device.h>
 #include "peer_connection.h"
 #include "utils.h"
 
@@ -23,6 +24,8 @@ namespace Microsoft::MixedReality::WebRTC {
 /// un-registering a tracked object being destroyed) are multithread-safe.
 class GlobalFactory {
  public:
+  rtc::scoped_refptr<webrtc::AudioDeviceModule> audio_module;
+
   /// Report live objects to debug output, and return the number of live objects
   /// at the time of the call. If the library is not initialized, this function
   /// returns 0. This is multithread-safe.

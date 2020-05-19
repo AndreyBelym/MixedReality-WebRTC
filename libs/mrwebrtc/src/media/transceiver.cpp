@@ -251,6 +251,8 @@ void Transceiver::OnLocalTrackAdded(RefPtr<LocalAudioTrack> track) {
   // this may be called multiple times with the same track
   RTC_DCHECK(!local_track_ || (local_track_ == track));
   local_track_ = std::move(track);
+
+  GlobalFactory::InstancePtr()->audio_module->EnableBuiltInAEC(0);
 }
 
 void Transceiver::OnLocalTrackAdded(RefPtr<LocalVideoTrack> track) {

@@ -88,6 +88,12 @@
     <ClCompile Include="$(MRWebRTCProjectRoot)libs\mrwebrtc\src\toggle_audio_mixer.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\libs\mrwebrtc\src\interop\external_audio_track_source_interop.cpp">
+      <Filter>src\interop</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libs\mrwebrtc\src\media\external_audio_track_source.cpp">
+      <Filter>src\media</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MRWebRTCProjectRoot)libs\mrwebrtc\src\media\external_video_track_source.h">
@@ -147,9 +153,6 @@
     <ClInclude Include="$(MRWebRTCProjectRoot)libs\mrwebrtc\src\mrs_errors.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="../pch.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClInclude Include="$(MRWebRTCProjectRoot)libs\mrwebrtc\src\peer_connection.h">
       <Filter>src</Filter>
     </ClInclude>
@@ -203,6 +206,16 @@
     </ClInclude>
     <ClInclude Include="$(MRWebRTCProjectRoot)libs\mrwebrtc\src\toggle_audio_mixer.h">
       <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MRWebRTCProjectRoot)libs\mrwebrtc\src\pch.h" />
+    <ClInclude Include="..\..\..\..\libs\mrwebrtc\include\external_audio_track_source_interop.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\mrwebrtc\src\media\external_audio_track_source.h">
+      <Filter>src\media</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\mrwebrtc\src\media\external_audio_track_source_impl.h">
+      <Filter>src\media</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

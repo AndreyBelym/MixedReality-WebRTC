@@ -21,6 +21,7 @@ enum class ObjectType : int {
   kPeerConnection,
   kLocalAudioTrack,
   kLocalVideoTrack,
+  kExternalAudioTrackSource,
   kExternalVideoTrackSource,
   kRemoteAudioTrack,
   kRemoteVideoTrack,

@@ -32,6 +32,13 @@ namespace Microsoft.MixedReality.WebRTC
     public class LocalAudioTrack : MediaTrack, IAudioTrack, IDisposable
     {
         /// <summary>
+        /// External source for this video track, or <c>null</c> if the source is some
+        /// internal video capture device, or has been removed from any peer connection
+        /// (and is therefore inactive).
+        /// </summary>
+        public ExternalAudioTrackSource Source { get; private set; } = null;
+
+        /// <summary>
         /// Enabled status of the track. If enabled, send local audio frames to the remote peer as
         /// expected. If disabled, send only black frames instead.
         /// </summary>
@@ -116,21 +123,52 @@ namespace Microsoft.MixedReality.WebRTC
             });
         }
 
+        /// <summary>
+        /// Create a new local video track backed by an existing external video source.
+        /// The track can be added to a peer connection by setting the <see cref="Transceiver.LocalVideoTrack"/>
+        /// property.
+        /// </summary>
+        /// <param name="trackName">Name of the new local video track.</param>
+        /// <param name="source">External video track source providing some video frames to the track.</param>
+        /// <returns>The newly created local video track.</returns>
+        /// <seealso cref="Transceiver.LocalVideoTrack"/>
+        public static LocalAudioTrack CreateFromExternalSource(string trackName, ExternalAudioTrackSource source)
+        {
+            if (string.IsNullOrEmpty(trackName))
+            {
+                trackName = Guid.NewGuid().ToString();
+            }
+
+            // Create interop wrappers
+            var track = new LocalAudioTrack(trackName, source);
+
+            // Parse settings
+            var config = new PeerConnectionInterop.LocalAudioTrackFromExternalSourceInteropInitConfig(trackName, source);
+
+            // Create native implementation objects
+            uint res = LocalAudioTrackInterop.LocalAudioTrack_CreateFromExternalSource(config, out LocalAudioTrackHandle trackHandle);
+            Utils.ThrowOnErrorCode(res);
+            track.SetHandle(trackHandle);
+            return track;
+        }
+
         // Constructor for interop-based creation; SetHandle() will be called later.
         // Constructor for standalone track not associated to a peer connection.
-        internal LocalAudioTrack(string trackName) : base(null, trackName)
+        internal LocalAudioTrack(string trackName, ExternalAudioTrackSource source = null) : base(null, trackName)
         {
             Transceiver = null;
+            Source = source;
         }
 
         // Constructor for interop-based creation; SetHandle() will be called later.
         // Constructor for a track associated with a peer connection.
-        internal LocalAudioTrack(PeerConnection peer, Transceiver transceiver, string trackName) : base(peer, trackName)
+        internal LocalAudioTrack(PeerConnection peer, Transceiver transceiver, string trackName, ExternalAudioTrackSource source = null) : base(peer, trackName)
         {
             Debug.Assert(transceiver.MediaKind == MediaKind.Audio);
             Debug.Assert(transceiver.LocalAudioTrack == null);
             Transceiver = transceiver;
             transceiver.LocalAudioTrack = this;
+            Source = source;
         }
 
         internal void SetHandle(LocalAudioTrackHandle handle)

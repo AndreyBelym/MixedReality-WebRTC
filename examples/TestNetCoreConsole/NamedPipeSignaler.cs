@@ -242,7 +242,8 @@ namespace NamedPipeSignaler
         {
             // GetConsumingEnumerable() will block when no message is available,
             // until CompleteAdding() is called from Stop().
-            foreach (var msg in _outgoingMessages.GetConsumingEnumerable())
+            foreach (var msg 
+                in _outgoingMessages.GetConsumingEnumerable())
             {
                 // Write the message and wait for the stream to be ready again
                 // for the next Write() call.

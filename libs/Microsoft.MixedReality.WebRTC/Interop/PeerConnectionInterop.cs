@@ -469,6 +469,37 @@ namespace Microsoft.MixedReality.WebRTC.Interop
         /// from an existing external video track source.
         /// </summary>
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
+        internal ref struct LocalAudioTrackFromExternalSourceInteropInitConfig
+        {
+            /// <summary>
+            /// Handle to native external video track source.
+            /// </summary>
+            public IntPtr SourceHandle;
+
+            /// <summary>
+            /// Name of the newly-created track. This must be a valid SDP token.
+            /// </summary>
+            [MarshalAs(UnmanagedType.LPStr)]
+            public string TrackName;
+
+            /// <summary>
+            /// Constructor for creating a local video track from a wrapper and an existing external source.
+            /// </summary>
+            /// <param name="source">The external source to use with the newly created native track.</param>
+            /// <param name="trackName">The newly created track name. This must be a valid SDP token.</param>
+            /// <seealso cref="LocalVideoTrack.CreateFromExternalSource(string, ExternalVideoTrackSource)"/>
+            public LocalAudioTrackFromExternalSourceInteropInitConfig(string trackName, ExternalAudioTrackSource source)
+            {
+                SourceHandle = source._nativeHandle.DangerousGetHandle();
+                TrackName = trackName;
+            }
+        }
+
+        /// <summary>
+        /// Helper structure to pass parameters to the native implementation when creating a local video track
+        /// from an existing external video track source.
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         internal ref struct LocalVideoTrackFromExternalSourceInteropInitConfig
         {
             /// <summary>

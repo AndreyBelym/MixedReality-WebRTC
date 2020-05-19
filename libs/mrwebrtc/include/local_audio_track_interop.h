@@ -28,6 +28,17 @@ MRS_API mrsResult MRS_CALL mrsLocalAudioTrackCreateFromDevice(
     const char* track_name,
     mrsLocalAudioTrackHandle* track_handle_out) noexcept;
 
+/// Configuration for creating a local audio track from an external source.
+struct mrsLocalAudioTrackFromExternalSourceInitConfig {
+  mrsExternalAudioTrackSourceHandle source_handle;
+  const char* track_name;
+};
+
+/// Create a new local audio track by using an existing external audio source.
+MRS_API mrsResult MRS_CALL mrsLocalAudioTrackCreateFromExternalSource(
+    const mrsLocalAudioTrackFromExternalSourceInitConfig* config,
+    mrsLocalAudioTrackHandle* track_handle_out) noexcept;
+
 /// Register a custom callback to be called when the local audio track captured
 /// a frame.
 MRS_API void MRS_CALL

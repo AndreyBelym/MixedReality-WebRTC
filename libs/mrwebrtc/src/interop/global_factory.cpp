@@ -5,6 +5,7 @@
 // line, to prevent clang-format from reordering it with other headers.
 #include "pch.h"
 
+#include "modules/audio_device/include/test_audio_device.h"
 #include "interop/global_factory.h"
 #include "media/local_video_track.h"
 #include "peer_connection.h"
@@ -17,6 +18,34 @@ namespace {
 
 using namespace Microsoft::MixedReality::WebRTC;
 
+class ZeroCapturer : public webrtc::TestAudioDeviceModule::Capturer {
+ public:
+  explicit ZeroCapturer(int sampling_frequency_in_hz)
+      : _sampling_frequency_in_hz(sampling_frequency_in_hz) {}
+
+  int SamplingFrequency() const override { return _sampling_frequency_in_hz; }
+
+  bool Capture(rtc::BufferT<int16_t>* buffer) override {
+    // NOTE(mroberts): If we don't fill this buffer once we trigger an assert.
+    if (!_produced_output) {
+      buffer->SetSize(
+          webrtc::TestAudioDeviceModule::SamplesPerFrame(_sampling_frequency_in_hz));
+      _produced_output = true;
+    }
+    return false;
+  }
+
+  int NumChannels() const override { return 1; }
+
+  static std::unique_ptr<ZeroCapturer> Create(int sampling_frequency_in_hz) {
+    return std::make_unique<ZeroCapturer>(sampling_frequency_in_hz);
+  }
+
+ private:
+  int _sampling_frequency_in_hz;
+  bool _produced_output = false;
+};
+
 /// Utility to convert an ObjectType to a string, for debugging purpose. This
 /// returns a view over a global constant buffer (static storage), which is
 /// always valid, never deallocated.
@@ -28,6 +57,8 @@ std::string_view ObjectTypeToString(ObjectType type) {
       return "LocalAudioTrack";
     case ObjectType::kLocalVideoTrack:
       return "LocalVideoTrack";
+    case ObjectType::kExternalAudioTrackSource:
+      return "ExternalAudioTrackSource";
     case ObjectType::kExternalVideoTrackSource:
       return "ExternalVideoTrackSource";
     case ObjectType::kRemoteAudioTrack:
@@ -160,6 +191,7 @@ RefPtr<GlobalFactory> GlobalFactory::GetInstancePtrImpl(
 
 GlobalFactory::~GlobalFactory() {
   std::scoped_lock lock(init_mutex_);
+
   ShutdownImplNoLock(ShutdownAction::kFromObjectDestructor);
 }
 
@@ -296,9 +328,21 @@ mrsResult GlobalFactory::InitializeImplNoLock() {
                              signaling_thread_.get());
   signaling_thread_->Start();
 
+  audio_module =
+      worker_thread_->Invoke<rtc::scoped_refptr<webrtc::AudioDeviceModule> >(
+          RTC_FROM_HERE, []() {
+            /*return webrtc::AudioDeviceModule::Create(
+                webrtc::AudioDeviceModule::AudioLayer::kWindowsCoreAudio
+            );*/
+            return webrtc::TestAudioDeviceModule::CreateTestAudioDeviceModule(
+                ZeroCapturer::Create(48000), webrtc::TestAudioDeviceModule::CreateDiscardRenderer(48000)
+            );
+          });
+
   peer_factory_ = webrtc::CreatePeerConnectionFactory(
       network_thread_.get(), worker_thread_.get(), signaling_thread_.get(),
-      nullptr, webrtc::CreateBuiltinAudioEncoderFactory(),
+      audio_module, 
+      webrtc::CreateBuiltinAudioEncoderFactory(),
       webrtc::CreateBuiltinAudioDecoderFactory(),
       std::unique_ptr<webrtc::VideoEncoderFactory>(
           new webrtc::MultiplexEncoderFactory(

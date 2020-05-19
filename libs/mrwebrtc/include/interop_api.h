@@ -103,6 +103,8 @@ using mrsDataChannelHandle = void*;
 /// Opaque handle to a native ExternalVideoTrackSource interop object.
 using mrsExternalVideoTrackSourceHandle = void*;
 
+/// Opaque handle to a native ExternalAudioTrackSource interop object.
+using mrsExternalAudioTrackSourceHandle = void*;
 //
 // Video capture enumeration
 //
@@ -573,6 +575,12 @@ struct mrsTransceiverInitConfig {
   /// Optional user data.
   void* user_data{nullptr};
 };
+
+using mrsRequestExternalAudioFrameCallback =
+    mrsResult(MRS_CALL*)(void* user_data,
+                         mrsExternalAudioTrackSourceHandle source_handle,
+                         uint32_t request_id,
+                         int64_t timestamp_ms);
 
 using mrsRequestExternalI420AVideoFrameCallback =
     mrsResult(MRS_CALL*)(void* user_data,
