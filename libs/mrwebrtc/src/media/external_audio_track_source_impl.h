@@ -10,6 +10,8 @@
 #include "callback.h"
 #include "external_audio_track_source.h"
 #include "interop_api.h"
+#include <Windows.h>
+#include <timeapi.h>
 
 namespace Microsoft::MixedReality::WebRTC::detail {
 
@@ -91,8 +93,7 @@ struct CustomAudioTrackSourceAdapter : public webrtc::LocalAudioSource {
 
 /// audio track source acting as an adapter for an external source of raw
 /// frames.
-class ExternalAudioTrackSourceImpl : public ExternalAudioTrackSource,
-                                     public rtc::MessageHandler {
+class ExternalAudioTrackSourceImpl : public ExternalAudioTrackSource {
  public:
   using SourceState = webrtc::MediaSourceInterface::SourceState;
 
@@ -129,13 +130,18 @@ class ExternalAudioTrackSourceImpl : public ExternalAudioTrackSource,
                                RefPtr<ExternalAudioSource> audio_source);
   // void Run(rtc::Thread* thread) override;
 
-  void OnMessage(rtc::Message* message) override;
+  static void CALLBACK OnMessage(unsigned int id,
+                          unsigned int res1,
+                          DWORD_PTR impl,
+      DWORD_PTR res2, DWORD_PTR res3
+      );
 
   RefPtr<ExternalAudioSource> audio_source;
 
   rtc::scoped_refptr<CustomAudioTrackSourceAdapter> track_source_;
 
-  std::unique_ptr<rtc::Thread> capture_thread_;
+  MMRESULT mmTimer;
+  //std::unique_ptr<rtc::Thread> capture_thread_;
 
   /// Collection of pending frame requests
   std::deque<std::pair<uint32_t, int64_t>> pending_requests_

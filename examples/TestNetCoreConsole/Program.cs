@@ -8,14 +8,35 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.MixedReality.WebRTC;
+using System.Linq;
+using System.Threading;
+using System.Diagnostics;
 
 namespace TestNetCoreConsole
 {
     class Program
 
     {
+        static List<long> heh = new List<long> { 0 };
+        static List<double> heh2 = new List<double>();
+        static Stopwatch ss;
+
         static unsafe void AudioCallback (in AudioFrameRequest request)
         {
+            if (heh.Count == 1)
+                ss = Stopwatch.StartNew();
+            heh2.Add((double)(System.Diagnostics.Stopwatch.GetTimestamp() - heh.Last())/Stopwatch.Frequency * 1000);
+            heh.Add(System.Diagnostics.Stopwatch.GetTimestamp());
+
+            
+
+            if (heh.Count % 500 == 0)
+            {
+                ss.Stop();
+                Console.WriteLine($"El: {ss.ElapsedMilliseconds}");
+                ss.Restart();
+            }
+
             var data = stackalloc ushort[480];
 
             for (int i = 0; i < 480; i += 1) {
